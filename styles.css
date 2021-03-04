@@ -1,4 +1,4 @@
-p, li, ul, h1, table {
+p, li, ul, h1, table, a:link {
 	color: #FDBB30;
 }
 
@@ -9,4 +9,16 @@ body {
 table { 
 	width: 70s%; 
 	text-align: center;
+}
+
+a:visited {
+	color: white;
+}
+
+a:hover {
+	color: white;
+}
+
+a:active {
+	color: black;
 }
