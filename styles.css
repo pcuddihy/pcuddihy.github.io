@@ -1,7 +1,12 @@
-p {
-	color: blue;
+p, li, ul, h1, table {
+	color: #FDBB30;
 }
 
-li {
-	color: green;
+body {
+	background-color: #00543C;
+}
+
+table { 
+	width: 70s%; 
+	text-align: center;
 }
