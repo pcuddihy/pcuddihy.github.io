@@ -12,6 +12,8 @@ function render(data) {
 
 	let xVal = d => d.cumulativeCases; //gets the cumulative cases for each entry
 	let yVal = d => d.neighborhood; //gets the neighborhood
+	let wVal = d => d.rate; //gets the cumulative cases for each entry
+	let zVal = d => d.population; //gets the neighborhood
 
 	//set the margins
 	let margin = {
@@ -73,6 +75,8 @@ function render(data) {
 		.attr("height", scaleY.bandwidth()) //sets up the bars with the right bandwidth for each bar
 		.attr("fill", "blue") //make the bar blue
 		.attr("count", d => xVal(d))
+		.attr("rate", d => wVal(d))
+		.attr("population", d => zVal(d))
 		.on("mouseover", function(d) {        
 			d3.select(this)
 				.transition()
@@ -80,11 +84,13 @@ function render(data) {
 
 			var attrs = d.srcElement.attributes;
         	let count = attrs['count'].value;
+        	let rate = (attrs['rate'].value);
+        	let population = attrs['population'].value;
 
         	//tooltip from the book
         	//https://learning.oreilly.com/library/view/interactive-data-visualization/9781491921296/ch10.html#interactivity
 
-			var xPos = parseFloat(d3.select(this).attr("width")) + 30;
+			var xPos = parseFloat(d3.select(this).attr("width")) - 120;
 			var yPos = parseFloat(d3.select(this).attr("y")) + scaleY.bandwidth() / 2 + 5;
 
 			g.append("text")
@@ -95,7 +101,7 @@ function render(data) {
 				.attr("font-family", "sans-serif")
 				.attr("font-size", 20)
 				.attr("fill", "black")
-				.text(count);
+				.text("Cases: " + count + ", Pop: " + population);
 		})
 		.on("mouseout", function() {
 			d3.select(this)
@@ -134,8 +140,8 @@ d3.csv("https://data.sfgov.org/api/views/tpyr-dvnc/rows.csv?accessType=DOWNLOAD"
 		return { //return the race and the cumulative cases
 			neighborhood: d["id"],
 			cumulativeCases: +d["count"],
-			deaths: +d["deaths"],
-			rate: +d["rate"]
+			rate: +d["rate"],
+			population: +d["acs_population"]
 		};
 	}
 }).then(function(data) {
