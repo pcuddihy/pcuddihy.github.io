@@ -1,6 +1,6 @@
 //selects the body of the html and appends svg with certain width and height
 let svg = d3.select("body").append("svg")
-	.attr("width", 1400)
+	.attr("width", 1440)
 	.attr("height", 750);
 
 //store the width and height for later
@@ -43,15 +43,15 @@ function render(data) {
 
 	g.append("g") //adds a grouping of the neighborhoods names
 		.call(yAxis)
-		.attr("font-size", 16); //size of major labels
+		.attr("font-size", 20); //size of major labels
 	
 	let xG = g.append("g") //adds another axis grouping for the x axis, sets up labels and ticks
 		.call(xAxis)
 		.attr("transform", `translate(0, ${innerHeight})`) //moves the number labels to bottom
-		.attr("font-size", 16);
+		.attr("font-size", 20);
 
 	xG.append("text") //add the x axis name below x axis
-		.attr("font-size", 22)
+		.attr("font-size", 24)
 		.attr("fill", "black")
 		.text("Cumulative Number of Cases")
 		.attr("y", 50)
@@ -59,8 +59,8 @@ function render(data) {
 
 	g.append("text") //adds another grouping for the name of the bar chart
 		.attr("font-family", "sans-serif")
-		.text("COVID-19 Cumulative Cases >1000 by Neighborhood, as of " + "2021/04/08")
-		.attr("font-size", 26)
+		.text("COVID-19 Cumulative Cases >1000 by Neighborhood, as of " + "2021/05/07")
+		.attr("font-size", 28)
 		.attr("text-anchor", "middle")
 		.attr("y", -20)
 		.attr("x", innerWidth / 2);
@@ -93,9 +93,8 @@ function render(data) {
 				.attr("y", yPos)
 				.attr("text-anchor", "middle")
 				.attr("font-family", "sans-serif")
-				.attr("font-size", "20px")
-				.attr("font-weight", "bold")
-				.attr("fill", "blue")
+				.attr("font-size", 20)
+				.attr("fill", "black")
 				.text(count);
 		})
 		.on("mouseout", function() {
@@ -104,6 +103,26 @@ function render(data) {
 				.attr("fill", "blue");
 
 			d3.select("#tooltip").remove();
+		});
+
+	/*
+
+	DATA SOURCE
+
+	*/
+
+	let sourcePage = "https://data.sfgov.org/COVID-19/COVID-19-Cases-and-Deaths-Summarized-by-Geography/tpyr-dvnc";
+
+	g.append("text") //adds another grouping for the name of the bar chart
+		.attr("font-family", "sans-serif")
+		.text("Source: DataSF")
+		.attr("text-anchor", "middle")
+		.attr("font-size", 16)
+		.attr("fill", "gray")
+		.attr("y", innerHeight + 80)
+		.attr("x", innerWidth / 2)
+		.on("click", function() {
+			window.open(sourcePage);
 		});
 }
 

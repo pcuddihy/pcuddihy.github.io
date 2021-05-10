@@ -31,15 +31,22 @@ function render(data) {
 
 	*/
 
+	console.log(d3.max(data, xVal));
+	console.log(d3.max(data, yVal));
+	//let latestDate = d3.max(data, xVal);
+	let unparsedLatestDate = "2021/05/04";
+	let latestDate = d3.timeParse("%Y/%m/%d")(unparsedLatestDate);
+	console.log(latestDate);
+
 	let scaleX = d3.scaleTime() //sets up how dates will scale
-		.domain([d3.min(data, xVal), d3.max(data, xVal)]) //the data space, but nice() rounds it cleanly
+		.domain([d3.min(data, xVal), latestDate]) //the data space, but nice() rounds it cleanly
 		.range([0, innerWidth]); //the pixel space
 
 	let xAxis = d3.axisBottom(scaleX) //the bottom axis is connected to the scaleX now
-		.tickSize(0)
+		.tickSize(5)
 		.tickPadding(10)
 		.ticks(5)
-		.tickFormat(d3.timeFormat("%b"));
+		.tickFormat(d3.timeFormat("%b %Y"));
 
 	let scaleY = d3.scaleLinear() //sets up how cases, y axis values will scale
 		.domain([0, d3.max(data, yVal)]).nice()
@@ -47,8 +54,7 @@ function render(data) {
 
 	let yAxis = d3.axisLeft(scaleY) //left axis is connected to the scaleY now
 		.tickPadding(10)
-		.ticks(5)
-		.tickSize(-innerWidth);
+		.ticks(5);
 
 	let g = svg.append("g")
 		.attr("transform", `translate(${margin.left}, ${margin.top})`); //moves the chart out into clear space
@@ -71,7 +77,7 @@ function render(data) {
 
 	g.append("text") //adds another grouping for the name of the line chart
 		.attr("font-family", "sans-serif")
-		.text("SF COVID-19 New Cases Per Day")
+		.text("SF COVID-19 New Cases Per Day as of " + unparsedLatestDate)
 		.attr("font-size", 26)
 		.attr("text-anchor", "middle")
 		.attr("y", -20)
@@ -95,6 +101,80 @@ function render(data) {
 		.attr("stroke-linejoin", "round") //smooths line a bit
 		.attr("stroke-linecap", "round") //smooths line a bit
 		.attr("d", line); //call line to draw line
+
+	/*
+
+	ANNOTATIONS
+
+	*/
+
+	let annotation1 = [{
+		note: {
+			label: "162 new cases",
+			bgPadding: 0,
+			title: "July 14, First smaller peak"
+		},
+		className: "show-bg",
+		x: 300,
+		y: 400,
+		dx: 100,
+		dy: -50
+	}]
+
+	let makeAnnotation1 = d3.annotation()
+		.editMode(false)
+		.notePadding(5)
+		.type(d3.annotationLabel)
+		.annotations(annotation1);
+
+	let label1 = g.append("g")
+		.attr("font-family", "sans-serif")
+		.attr("class", "annotation-group")
+		.call(makeAnnotation1);
+
+	let annotation2 = [{
+		note: {
+			label: "563 new cases",
+			bgPadding: 0,
+			title: "January 4, SF reaches peak"
+		},
+		className: "show-bg",
+		x: 690,
+		y: 30,
+		dx: -200,
+		dy: 0
+	}]
+
+	let makeAnnotation2 = d3.annotation()
+		.editMode(false)
+		.notePadding(10)
+		.type(d3.annotationLabel)
+		.annotations(annotation2);
+
+	let label2 = g.append("g")
+		.attr("font-family", "sans-serif")
+		.attr("class", "annotation-group")
+		.call(makeAnnotation2);
+
+	/*
+
+	DATA SOURCE
+
+	*/
+
+	let sourcePage = "https://data.sfgov.org/COVID-19/COVID-19-Cases-Summarized-by-Date-Transmission-and/tvq9-ec9w";
+
+	g.append("text") //adds another grouping for the name of the pie chart
+		.attr("font-family", "sans-serif")
+		.text("Source: DataSF")
+		.attr("text-anchor", "middle")
+		.attr("font-size", 16)
+		.attr("fill", "gray")
+		.attr("y", innerHeight + 50)
+		.attr("x", innerWidth / 2)
+		.on("click", function() {
+			window.open(sourcePage);
+		});
 }
 
 d3.csv("https://data.sfgov.org/api/views/tvq9-ec9w/rows.csv?accessType=DOWNLOAD", function(d) { //for each entry

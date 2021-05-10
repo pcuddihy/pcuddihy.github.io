@@ -8,7 +8,7 @@ Used Susie Lu's legend library for setting up the legend.
 
 //selects the body of the html and appends svg with certain width and height
 let svg = d3.select("body").append("svg")
-	.attr("width", 1400)
+	.attr("width", 1440)
 	.attr("height", 750);
 
 //store the width and height for later
@@ -37,29 +37,31 @@ function render(data) {
 		.outerRadius(radius - 10)
 		.innerRadius(0);
 
-	// let labelArc = d3.arc()	//can be used to put text inside pie slices
-	// 	.outerRadius(radius - 40)
-	// 	.innerRadius(radius - 40);
+	let labelArc = d3.arc()	//can be used to put text inside pie slices
+		.outerRadius(radius - 100)
+		.innerRadius(radius - 100);
 
 	let pie = d3.pie()
 		.value(d => d.cumulativeCases);
 
 	let color = d3.scaleOrdinal()
   		.domain(data.map(yVal))
-  		.range(["pink", "red", "orange", "green", "chartreuse", "cyan", "steelblue", "darkblue", "purple", "black", "gray", "brown", "chocolate", "gold"])
+  		.range(["pink", "red", "orange", "green", "chartreuse", "cyan", "blue", "darkblue", "purple", "black", "gray", "brown", "chocolate", "gold"])
 
   	let legend = d3.legendColor() //make legend using Susie Lu's library
 		.ascending(false)
-		.title("Age Group Color Legend")
-		.titleWidth(150)
+		.title("Age Group Color Legend, ages sorted from most cases to least")
+		.titleWidth(200)
 		.scale(color);
 
-	svg.append("g") //draw legend on page
-		.attr("transform", "translate(100, 225)")
-		.call(legend);
+	let g = svg.append("g") //draw legend on page
+		.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-	let g = svg.append("g")
-		.attr("transform", `translate(${margin.left}, ${margin.top})`); //moves the chart out into clear space
+	g.append("g")
+		.attr("transform", "translate(200, -100)")
+		.attr("font-family", "sans-serif")
+		.attr("font-size", 20)
+		.call(legend);
 
 	g.append("text") //adds another grouping for the name of the bar chart
 		.attr("font-family", "sans-serif")
@@ -80,14 +82,15 @@ function render(data) {
 		.attr("fill", d => color(d.data.ageGroup))
 		.attr("id", d => d.data.ageGroup)
 		.attr("value", d => d.data.cumulativeCases)
+		.attr("percentage", d => d.data.percentage)
 		.on("mouseover", function(d) {        
 			d3.select(this)
-				.transition()
-				.attr("fill", "blue");
+				.attr("opacity", 0.5);
 
 			var attrs = d.srcElement.attributes;
 			let id = attrs['id'].value;
 			let value  = attrs['value'].value;
+			let percentage  = attrs['percentage'].value;
 
 			g.append("text")
 				.attr("id", "tooltip")
@@ -95,21 +98,53 @@ function render(data) {
 				.attr("y", -125)
 				.attr("text-anchor", "middle")
 				.attr("font-family", "sans-serif")
-				.attr("font-size", "20px")
-				.attr("font-weight", "bold")
-				.attr("fill", "blue")
-				.text(id + ": " + value + " cumulative cases");
+				.attr("font-size", 20)
+				.attr("fill", "black")
+				.text(id + ": " + value + " cumulative cases, Percentage: " + percentage + "%");
 		})
 		.on("mouseout", function() {
 			d3.select(this)
 				.transition()
-				.attr("fill", d => color(d.data.ageGroup));
+				.attr("opacity", 1);
 
 			d3.select("#tooltip").remove();
 		});
+
+	pieG.append("text")
+		.attr("transform", d => "translate(" + labelArc.centroid(d) + ")")
+		.attr("dy", ".35em")
+		.attr("text-anchor", "middle")
+		.attr("font-family", "sans-serif")
+		.attr("font-size", 20)
+		.attr("fill", "black")
+		.text(function(d) {
+			if (d.data.percentage > 10) {
+				return d.data.percentage + "%";
+			}
+		});
+
+	/*
+
+	DATA SOURCE
+
+	*/
+
+	let sourcePage = "https://data.sfgov.org/COVID-19/COVID-19-Cases-Summarized-by-Age-Group/sunc-2t3k";
+
+	g.append("text") //adds another grouping for the name of the pie chart
+		.attr("font-family", "sans-serif")
+		.text("Source: DataSF")
+		.attr("text-anchor", "middle")
+		.attr("font-size", 16)
+		.attr("fill", "gray")
+		.attr("y", innerHeight + 50)
+		.attr("x", innerWidth / 2)
+		.on("click", function() {
+			window.open(sourcePage);
+		});
 }
 
-let desiredDate = "2021/04/19";
+let desiredDate = "2021/05/04";
 
 d3.csv("https://data.sfgov.org/api/views/sunc-2t3k/rows.csv?accessType=DOWNLOAD", function(d) { //for each entry
 	//if the day is the most recent day
@@ -121,8 +156,17 @@ d3.csv("https://data.sfgov.org/api/views/sunc-2t3k/rows.csv?accessType=DOWNLOAD"
 	}
 }).then(function(data) {
 	data.sort(function(x,y) {
-		return d3.descending(x.cumulativeCases, y.cumulativeCases); //sorts the function so in bar chart, highest will be at top
+		return d3.descending(x.cumulativeCases, y.cumulativeCases); //sorts the function so in pie chart, highest will be at top
 	});
+
+	var sum = 0; 
+	for (var i = 0; i < data.length; i++) {
+		sum += data[i].cumulativeCases;
+	}
+
+	for (var i = 0; i < data.length; i++) {
+		data[i].percentage = (data[i].cumulativeCases / sum * 100).toFixed(2);
+	}
 
 	render(data); //then render the data as it has been fully processed
 });
