@@ -61,7 +61,7 @@ function render(data) {
 
 	g.append("text") //adds another grouping for the name of the bar chart
 		.attr("font-family", "sans-serif")
-		.text("COVID-19 Cumulative Cases >1000 by Neighborhood, as of " + "2021/05/07")
+		.text("SF COVID-19 Cumulative Cases >1000 by Neighborhood, as of " + "2021/05/07")
 		.attr("font-size", 28)
 		.attr("text-anchor", "middle")
 		.attr("y", -20)
